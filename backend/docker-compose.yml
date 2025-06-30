@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  anyloc-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: anyloc-similarity-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - anyloc-data:/app/data
+    environment:
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEVICE=auto
+      - LOG_LEVEL=INFO
+      - MAX_FILE_SIZE=10485760
+      - VLAD_CLUSTERS=64
+      - VLAD_DESC_DIM=1536
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  anyloc-data:
