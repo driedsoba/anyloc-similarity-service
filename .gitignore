@@ -1,3 +1,10 @@
+# Database and generated files
+backend/app/models/
+backend/app/uploads/
+backend/logs/
+backend/venv/
+backend/app/anyloc/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -84,3 +91,9 @@ htmlcov/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Feature files
+*.npy
+*.db
+*.db-wal
+*.db-shm
