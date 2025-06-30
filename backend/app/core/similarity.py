@@ -128,13 +128,13 @@ class SQLiteSimilarityEngine:
             if anyloc_path not in sys.path:
                 sys.path.append(anyloc_path)
             
-            from anyloc.demo.utilities import DinoV2ExtractFeatures, VLAD
+            from demo.utilities import DinoV2ExtractFeatures, VLAD
             
             # Initialize DINOv2 extractor
             self.dino_extractor = DinoV2ExtractFeatures(
-                model_id=settings.DINO_MODEL,
-                desc_layer=settings.DESC_LAYER,
-                desc_facet=settings.DESC_FACET,
+                dino_model=settings.DINO_MODEL,
+                layer=settings.DESC_LAYER,
+                facet=settings.DESC_FACET,
                 device=self.device
             )
             
@@ -143,14 +143,14 @@ class SQLiteSimilarityEngine:
                 logger.warning(f"VLAD centers not found at {settings.vlad_centers_path}")
                 return False
             
-            vlad_centers = torch.load(settings.vlad_centers_path, map_location=self.device)
+            vlad_centers = torch.load(settings.vlad_centers_path, map_location=self.device, weights_only=True)
             self.vlad = VLAD(
                 num_clusters=settings.VLAD_CLUSTERS,
                 desc_dim=settings.VLAD_DESC_DIM,
                 cache_dir=str(settings.MODEL_PATH / "vocabulary"),
-                device=self.device
             )
             self.vlad.c_centers = vlad_centers.to(self.device)
+            self.vlad.fit(vlad_centers)
             
             # Setup image transforms
             self.image_transform = transforms.Compose([
@@ -189,7 +189,7 @@ class SQLiteSimilarityEngine:
                 dino_features = self.dino_extractor(image_tensor)  # [1, num_patches, 1536]
                 
                 # VLAD aggregation
-                vlad_features = self.vlad(dino_features)  # [1, 98304]
+                vlad_features = self.vlad.generate_multi(dino_features)  # [1, 98304]
                 
                 # Normalize and convert to numpy
                 vlad_features = F.normalize(vlad_features, p=2, dim=1)
