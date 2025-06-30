@@ -1,3 +1,0 @@
-[submodule "backend/anyloc"]
-	path = backend/anyloc
-	url = https://github.com/AnyLoc/AnyLoc.git
