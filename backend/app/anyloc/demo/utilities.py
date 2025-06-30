@@ -333,7 +333,7 @@ class VLAD:
                     torch.save(labels, 
                             f"{self.cache_dir}/{cache_id}_l.pt")
             # Create VLAD from residuals and labels
-            used_clusters = set(labels.numpy())
+            used_clusters = set(labels.cpu().numpy())
             for k in used_clusters:
                 # Sum of residuals for the descriptors in the cluster
                 #  Shape:[q, c, d]  ->  [q', d] -> [d]
